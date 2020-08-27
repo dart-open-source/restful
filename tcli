@@ -1,0 +1,26 @@
+#!/bin/bash
+
+case "$1" in
+    start)
+        dart lib/main.dart start
+        ;;
+    stop)
+        dart lib/main.dart stop
+        ;;
+    status)
+         echo "normal"
+        ;;
+    restart)
+        $0 stop
+        sleep 1
+        $0 start
+        sleep 1
+        $0 status
+        ;;
+    -v)
+        echo "dart author:almpazel@gmail.com , version:1.0.0"
+        ;;
+    *)
+        echo "Please use start, stop, restart or status as first argument or [-v]"
+        ;;
+esac
