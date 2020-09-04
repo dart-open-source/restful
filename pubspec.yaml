@@ -6,7 +6,7 @@ homepage: https://github.com/almpazel/dart-restful
 ## pub publish --server=https://pub.dartlang.org
 ## dart example/example.dart
 ## nohup dart example/example.dart > example.log 2>&1 &
-## nohup dart app/app.dart > example.log 2>&1 &
+## nohup dart app/app.dart > app.log 2>&1 &
 ## 9031
 
 environment:
