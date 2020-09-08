@@ -6,8 +6,7 @@ class PubApi extends Api {
   Map<String, kApiMethod> get blocks => {'apply': apply};
 
   Future<dynamic> apply() async {
-    var map = await jsonData();
 
-    return Api.success(map);
+    return Api.success(post);
   }
 }

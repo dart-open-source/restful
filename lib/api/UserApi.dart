@@ -16,19 +16,18 @@ class UserApi extends Api {
       };
 
   Future<dynamic> login() async {
-    var map = await jsonData();
     try {
-      if (map.containsKey('name') && map.containsKey('pass')) {
-        var whereQ = where.eq('name', map['name'].toString());
+      if (post != null && post.containsKey('name') && post.containsKey('pass')) {
+        var whereQ = where.eq('name', post['name'].toString());
         await Dao.connect();
         var info = await Dao.user.findOne(whereQ);
         if (info == null) throw Exception('not fund user');
-        if (info['pass'] != map['pass']) throw Exception('not fund user');
+        if (info['pass'] != post['pass']) throw Exception('not fund user');
 
         info['token'] = tokenGen(info);
         info['request'] = requestInfo;
 
-        map.forEach((key, value) {
+        post.forEach((key, value) {
           info[key] = value;
         });
 
@@ -42,17 +41,16 @@ class UserApi extends Api {
   }
 
   Future<dynamic> register() async {
-    var map = await jsonData();
     try {
-      if (map.containsKey('name') && map.containsKey('pass')) {
-        var whereQ = where.eq('name', map['name'].toString());
+      if (post != null && post.containsKey('name') && post.containsKey('pass')) {
+        var whereQ = where.eq('name', post['name'].toString());
         await Dao.connect();
         var info = await Dao.user.findOne(whereQ);
         if (info != null) throw Exception('already registered this account');
-        map['token'] = tokenGen(map);
-        map['request'] = requestInfo;
-        await Dao.user.insert(map);
-        return Api.success({'token': map['token']});
+        post['token'] = tokenGen(post);
+        post['request'] = requestInfo;
+        await Dao.user.insert(post);
+        return Api.success({'token': post['token']});
       }
     } catch (e) {
       return Api.error(e.toString());

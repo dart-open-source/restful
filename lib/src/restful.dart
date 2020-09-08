@@ -1,32 +1,31 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:meta/meta.dart';
-import 'package:mongo_dart/mongo_dart.dart';
 import 'package:restful/global.dart';
 
 typedef kApiMethod = Future<dynamic> Function();
+typedef kRouteMethod = Api Function(Uri);
 
 abstract class _Api {
   HttpRequest request;
-  String action;
-  kApiMethod onActionNull;
 
   String get token;
 
-  List<String> arguments = [];
   Map<String, kApiMethod> allows = {};
   Map<String, kApiMethod> blocks = {};
 
   void init();
 
   @mustCallSuper
-  Future<dynamic> enter(HttpRequest request);
+  Future<dynamic> enter(HttpRequest request, Map post);
 
   Future<bool> tokenExpired();
 }
 
 class Api implements _Api {
   static var version = '0.0.1';
+
+  Map post;
 
   @override
   void init() {}
@@ -38,38 +37,25 @@ class Api implements _Api {
     return map;
   }
 
-  Future<Map> jsonData() async {
-    try {
-      dynamic map;
-      await request.listen((event) {
-        map = jsonDecode(utf8.decode(event));
-      });
-      return map;
-    } catch (e) {
-      return null;
-    }
-  }
-
   @override
-  Future<dynamic> enter(HttpRequest request) async {
+  Future<dynamic> enter(HttpRequest request, Map post) async {
     this.request = request;
+    this.post = post;
     var pathSegments = request.requestedUri.pathSegments;
-    arguments = pathSegments.getRange(1, pathSegments.length - 1).toList();
-    action = pathSegments.last;
-
+    var action = pathSegments.last;
+    dynamic res;
     if (blocks.containsKey(action)) {
       if (await tokenExpired()) return Api.errorToken();
       await init();
-      return await blocks[action]();
+      res=await blocks[action]();
     } else if (allows.containsKey(action)) {
       await init();
-      return await allows[action]();
+      res=await allows[action]();
     } else {
-      return _actionNotFound;
+      res=error('$action not found in [$runtimeType]');
     }
+    return jsonEncode(res);
   }
-
-  Map get _actionNotFound => {'error': '$action not found in [$runtimeType]'};
 
   static Map error(dynamic s, {dynamic msg = 'error'}) {
     return {'msg': msg, 'code': -1, 'result': s};
@@ -89,47 +75,55 @@ class Api implements _Api {
     return false;
   }
 
-  static void start(Map<String, Api> routeMap, {int port = 4040, Future<void> onStart, Future<void> onClose, Function onUpdate}) async {
+  static void start(kRouteMethod routeMap, {int port = 4040, Future<void> onStart, Future<void> onClose, Function onUpdate}) async {
     var server = await HttpServer.bind('0.0.0.0', port);
     if (onStart != null) await onStart;
     print('Listening on http://${server.address.host}:${server.port}/system/info');
     await for (HttpRequest request in server) {
       if (onUpdate != null) onUpdate();
-      request.response.headers.contentType = ContentType.json;
-      request.response.headers.add('Access-Control-Allow-Origin', '*');
-      request.response.headers.add('Access-Control-Allow-Methods', '*');
-      request.response.headers.add('Server', 'Dart-RestFul ${Api.version}');
-      var json = '{}';
+
+      var reqMsg='${request.method} ${request.requestedUri}(${request.contentLength})';
+
+      var response = request.response;
       try {
-        var res = {};
-        final route = request.requestedUri.pathSegments.first;
-        final api = routeMap[route];
-        if (api != null) res = await api.enter(request);
-        print('method:${request.method} requestedUri:${request.requestedUri} contentLength:${request.contentLength} ');
-        json = jsonEncode(res);
+        response.headers.contentType = ContentType.json;
+        response.headers.add('Access-Control-Allow-Origin', '*');
+        response.headers.add('Access-Control-Allow-Methods', '*');
+        response.headers.add('Server', 'Dart-RestFul ${Api.version}');
+        String resBody;
+        try {
+          if (request.method == 'POST' || request.method == 'GET') {
+            Map post;
+            if (request.method == 'POST') {
+              post = jsonDecode(await utf8.decoder.bind(request).join());
+            }
+            final api = routeMap(request.requestedUri);
+            resBody = await api.enter(request, post);
+            response.statusCode = HttpStatus.ok;
+          } else {
+            throw Exception('Unsupported request: ${request.method}.');
+          }
+        } catch (e) {
+          response.statusCode = HttpStatus.internalServerError;
+          resBody = jsonEncode(Api.error(e.toString()));
+        }
+        response.write(resBody);
+        await response.close();
+
+        print('${timestamp()} $reqMsg -> ${response.statusCode} (${response.contentLength})');
+
       } catch (e) {
-        json = jsonEncode(Api.error(e.toString()));
+        print('error:$e');
       }
-      request.response.write(json);
-      await request.response.close();
     }
     if (onClose != null) await onClose;
   }
 
   @override
-  String action;
-
-  @override
   Map<String, kApiMethod> allows = {};
 
   @override
-  List<String> arguments = [];
-
-  @override
   Map<String, kApiMethod> blocks = {};
-
-  @override
-  kApiMethod onActionNull;
 
   @override
   HttpRequest request;

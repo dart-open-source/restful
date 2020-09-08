@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:restful/restful.dart';
 
 import 'api/HomeApi.dart';
-import 'api/PubApi.dart';
 import 'api/UserApi.dart';
 import 'api/SystemApi.dart';
 
@@ -13,17 +12,17 @@ import 'dao.dart';
 import 'restful.dart';
 export 'restful.dart';
 
-final RouteMap = {
-  'user': UserApi(),
-  '/': HomeApi(),
-  'system': SystemApi(),
-  'pub': PubApi(),
-};
-
-void main(List<String> arguments) async {
-  App.init();
-  await Api.start(RouteMap, port: 30400);
+Api routerMap(Uri uri) {
+  switch (uri.pathSegments.first) {
+    case 'user':
+      return UserApi();
+    case 'system':
+      return SystemApi();
+  }
+  return HomeApi();
 }
+
+
 
 final App = _App();
 
@@ -42,5 +41,9 @@ class _App {
     }
     return _config;
   }
+}
 
+void main(List<String> arguments) async {
+  App.init();
+  await Api.start(routerMap, port: 30400);
 }
