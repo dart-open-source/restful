@@ -28,6 +28,10 @@ class UserApi extends Api {
         info['time']=timestamp();
         info['token']=base64Encode('${info['time']}:${map['name']}=${map['pass']}'.codeUnits);
 
+        map.forEach((key, value) {
+          info[key]=value;
+        });
+
         await Dao.user.update(whereQ, info);
         return Api.success({'token':info['token']});
       }
