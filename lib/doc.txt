@@ -1,0 +1,5 @@
+
+
+mongo -port 37017
+use admin
+db.createUser({user:"mgrocer",pwd: "F179grocer",roles:[{role: "readWrite",db:"grocers"},"clusterAdmin"]})
