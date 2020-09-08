@@ -1,4 +1,4 @@
-import 'package:restful/restful.dart';
+import '../app.dart';
 
 class PubApi extends Api {
 

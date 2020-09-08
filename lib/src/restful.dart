@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:meta/meta.dart';
+import 'package:mongo_dart/mongo_dart.dart';
 
 typedef kApiMethod = Future<dynamic> Function();
 
@@ -24,16 +25,19 @@ class Api implements _Api {
   @override
   void init() {}
 
-  Future<Map> jsonData() async {
-    var map = {};
-    await request.listen((event) {
-      try {
-        map = Map.from(jsonDecode(utf8.decode(event)));
-      } catch (e) {
-        map = {'error': e};
-      }
-    });
-    return map;
+  Future<Map<String,dynamic>> jsonData() async {
+    try {
+      dynamic map = {};
+      await request.listen((event) {
+        map = jsonDecode(utf8.decode(event));
+      });
+      map['create_at']=DateTime.now();
+      map['ip']='${request.connectionInfo.remoteAddress.host}:${request.connectionInfo.remotePort}';
+      map['header']='${request.headers}';
+      return Map.from(map);
+    } catch (e) {
+      return null;
+    }
   }
 
   @override
