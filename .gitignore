@@ -3,6 +3,7 @@
 .packages
 .idea/
 .gradle/
+.config.json
 gradle/
 gradlew
 gradlew.bat
