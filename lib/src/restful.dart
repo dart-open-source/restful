@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:mongo_dart/mongo_dart.dart';
+import 'package:restful/global.dart';
 
 typedef kApiMethod = Future<dynamic> Function();
 
@@ -9,32 +10,41 @@ abstract class _Api {
   HttpRequest request;
   String action;
   kApiMethod onActionNull;
+
   String get token;
+
   List<String> arguments = [];
   Map<String, kApiMethod> allows = {};
   Map<String, kApiMethod> blocks = {};
+
   void init();
+
   @mustCallSuper
   Future<dynamic> enter(HttpRequest request);
+
   Future<bool> tokenExpired();
 }
 
 class Api implements _Api {
-  static var version='0.0.1';
+  static var version = '0.0.1';
 
   @override
   void init() {}
 
-  Future<Map<String,dynamic>> jsonData() async {
+  Map get requestInfo {
+    dynamic map = {};
+    map['ip'] = '${request.connectionInfo.remoteAddress.host}:${request.connectionInfo.remotePort}';
+    map['header'] = '${request.headers}';
+    return map;
+  }
+
+  Future<Map> jsonData() async {
     try {
-      dynamic map = {};
+      dynamic map;
       await request.listen((event) {
         map = jsonDecode(utf8.decode(event));
       });
-      map['create_at']=DateTime.now();
-      map['ip']='${request.connectionInfo.remoteAddress.host}:${request.connectionInfo.remotePort}';
-      map['header']='${request.headers}';
-      return Map.from(map);
+      return map;
     } catch (e) {
       return null;
     }
@@ -61,16 +71,16 @@ class Api implements _Api {
 
   Map get _actionNotFound => {'error': '$action not found in [$runtimeType]'};
 
-  static Map error(dynamic s,{dynamic msg='error'}) {
-    return {'msg': msg,'code': -1, 'result': s};
+  static Map error(dynamic s, {dynamic msg = 'error'}) {
+    return {'msg': msg, 'code': -1, 'result': s};
   }
 
   static Map errorToken() {
     return error('token expired or need re login!');
   }
 
-  static Map success(dynamic s,{dynamic msg='success'}) {
-    return {'msg': msg,'code': 1, 'result': s};
+  static Map success(dynamic s, {dynamic msg = 'success'}) {
+    return {'msg': msg, 'code': 1, 'result': s};
   }
 
   @override
@@ -79,7 +89,7 @@ class Api implements _Api {
     return false;
   }
 
-  static void start(Map<String, Api> routeMap, {int port=4040,Future<void> onStart, Future<void> onClose, Function onUpdate}) async {
+  static void start(Map<String, Api> routeMap, {int port = 4040, Future<void> onStart, Future<void> onClose, Function onUpdate}) async {
     var server = await HttpServer.bind('0.0.0.0', port);
     if (onStart != null) await onStart;
     print('Listening on http://${server.address.host}:${server.port}/system/info');
@@ -110,13 +120,13 @@ class Api implements _Api {
   String action;
 
   @override
-  Map<String, kApiMethod> allows={};
+  Map<String, kApiMethod> allows = {};
 
   @override
-  List<String> arguments=[];
+  List<String> arguments = [];
 
   @override
-  Map<String, kApiMethod> blocks={};
+  Map<String, kApiMethod> blocks = {};
 
   @override
   kApiMethod onActionNull;

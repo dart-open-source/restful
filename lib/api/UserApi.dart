@@ -19,21 +19,21 @@ class UserApi extends Api {
     var map = await jsonData();
     try {
       if (map.containsKey('name') && map.containsKey('pass')) {
-        var whereQ=where.eq('name', map['name'].toString());
+        var whereQ = where.eq('name', map['name'].toString());
         await Dao.connect();
         var info = await Dao.user.findOne(whereQ);
         if (info == null) throw Exception('not fund user');
         if (info['pass'] != map['pass']) throw Exception('not fund user');
 
-        info['time']=timestamp();
-        info['token']=base64Encode('${info['time']}:${map['name']}=${map['pass']}'.codeUnits);
+        info['token'] = tokenGen(info);
+        info['request'] = requestInfo;
 
         map.forEach((key, value) {
-          info[key]=value;
+          info[key] = value;
         });
 
         await Dao.user.update(whereQ, info);
-        return Api.success({'token':info['token']});
+        return Api.success({'token': info['token']});
       }
     } catch (e) {
       return Api.error(e.toString());
@@ -45,16 +45,14 @@ class UserApi extends Api {
     var map = await jsonData();
     try {
       if (map.containsKey('name') && map.containsKey('pass')) {
-        var whereQ=where.eq('name', map['name'].toString());
+        var whereQ = where.eq('name', map['name'].toString());
         await Dao.connect();
         var info = await Dao.user.findOne(whereQ);
         if (info != null) throw Exception('already registered this account');
-
-        map['time']=timestamp();
-        info['token']=base64Encode('${info['time']}:${map['name']}=${map['pass']}'.codeUnits);
-
+        map['token'] = tokenGen(map);
+        map['request'] = requestInfo;
         await Dao.user.insert(map);
-        return Api.success({'token':map['token']});
+        return Api.success({'token': map['token']});
       }
     } catch (e) {
       return Api.error(e.toString());
@@ -65,5 +63,10 @@ class UserApi extends Api {
   Future<dynamic> info() async {
     //todo get info
     return Api.error('info');
+  }
+
+  String tokenGen(Map info) {
+    info['time'] = timedate();
+    return base64Encode('${info['time']}:${info['name']}=${info['pass']}'.codeUnits);
   }
 }
