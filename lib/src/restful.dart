@@ -62,7 +62,7 @@ class Api implements _Api {
   Map get _actionNotFound => {'error': '$action not found in [$runtimeType]'};
 
   static Map error(dynamic s,{dynamic msg='error'}) {
-    return {'msg': msg,'code': -1, 'data': s};
+    return {'msg': msg,'code': -1, 'result': s};
   }
 
   static Map errorToken() {
@@ -70,7 +70,7 @@ class Api implements _Api {
   }
 
   static Map success(dynamic s,{dynamic msg='success'}) {
-    return {'msg': msg,'code': 1, 'data': s};
+    return {'msg': msg,'code': 1, 'result': s};
   }
 
   @override
