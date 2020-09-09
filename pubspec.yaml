@@ -10,6 +10,8 @@ homepage: https://github.com/almpazel/dart-restful
 ## nohup dart lib/app.dart > app.log 2>&1 &
 ## 9031
 
+## db.grantRolesToUser("admin" ,["root"])
+
 environment:
   sdk: '>=2.8.1 <3.0.0'
 

@@ -1,6 +1,4 @@
 import 'package:mongo_dart/mongo_dart.dart';
-import 'dart:io' show Platform;
-
 import 'app.dart';
 
 final Dao = _Dao();
@@ -13,12 +11,10 @@ class _Dao {
   }
 
   bool get _isDbOpen => db.state == State.OPEN || db.state == State.OPENING;
-
   DbCollection get loginLog => db.collection('loginLog');
-
   DbCollection get user => db.collection('user');
 
-  Future<void> connect() async {
+  Future connect() async {
     if (!_isDbOpen) await db.open();
   }
 
