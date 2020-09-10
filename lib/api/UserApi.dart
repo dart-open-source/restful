@@ -16,44 +16,36 @@ class UserApi extends Api {
       };
 
   Future<dynamic> login() async {
-    try {
-      if (post != null && post.containsKey('name') && post.containsKey('pass')) {
-        var whereQ = where.eq('name', post['name'].toString());
-        await Dao.connect();
-        var info = await Dao.user.findOne(whereQ);
-        if (info == null) throw Exception('not fund user');
-        if (info['pass'] != post['pass']) throw Exception('not fund user');
+    if (post != null && post.containsKey('name') && post.containsKey('pass')) {
+      var whereQ = where.eq('name', post['name'].toString());
+      await Dao.connect();
+      var info = await Dao.user.findOne(whereQ);
+      if (info == null) throw Exception('not fund user');
+      if (info['pass'] != post['pass']) throw Exception('not fund user');
 
-        info['token'] = tokenGen(info);
-        info['request'] = requestInfo;
+      info['token'] = tokenGen(info);
+      info['request'] = requestInfo;
 
-        post.forEach((key, value) {
-          info[key] = value;
-        });
+      post.forEach((key, value) {
+        info[key] = value;
+      });
 
-        await Dao.user.update(whereQ, info);
-        return Api.success({'token': info['token']});
-      }
-    } catch (e) {
-      return Api.error(e.toString());
+      await Dao.user.update(whereQ, info);
+      return Api.success({'token': info['token']});
     }
     return Api.error('data error');
   }
 
   Future<dynamic> register() async {
-    try {
-      if (post != null && post.containsKey('name') && post.containsKey('pass')) {
-        var whereQ = where.eq('name', post['name'].toString());
-        await Dao.connect();
-        var info = await Dao.user.findOne(whereQ);
-        if (info != null) throw Exception('already registered this account');
-        post['token'] = tokenGen(post);
-        post['request'] = requestInfo;
-        await Dao.user.insert(post);
-        return Api.success({'token': post['token']});
-      }
-    } catch (e) {
-      return Api.error(e.toString());
+    if (post != null && post.containsKey('name') && post.containsKey('pass')) {
+      var whereQ = where.eq('name', post['name'].toString());
+      await Dao.connect();
+      var info = await Dao.user.findOne(whereQ);
+      if (info != null) throw Exception('already registered this account');
+      post['token'] = tokenGen(post);
+      post['request'] = requestInfo;
+      await Dao.user.insert(post);
+      return Api.success({'token': post['token']});
     }
     return Api.error('data error');
   }

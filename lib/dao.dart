@@ -13,6 +13,7 @@ class _Dao {
   bool get _isDbOpen => db.state == State.OPEN || db.state == State.OPENING;
   DbCollection get loginLog => db.collection('loginLog');
   DbCollection get user => db.collection('user');
+  DbCollection get category => db.collection('category');
 
   Future connect() async {
     if (!_isDbOpen) await db.open();

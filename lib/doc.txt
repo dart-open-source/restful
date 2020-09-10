@@ -2,4 +2,26 @@
 
 mongo -port 37017
 use admin
-db.createUser({user:"mgrocer",pwd: "F179grocer",roles:[{role: "readWrite",db:"grocers"},"clusterAdmin"]})
+db.createUser({user: "grocers",pwd: "F179grocers", roles: [ "readWrite", "dbAdmin" ]})
+
+db.createUser({user:"grocers",pwd: "F179grocers",roles:[{role: "readWrite",db:"grocers"}]})
+db.grantRolesToUser("grocers" ,[{role: "readWrite",db:"grocers"}])
+
+
+Fresh Produce
+Meat
+Canned Goods
+Sauces/Toppings/Spices
+Dairy/eggs
+Breads/Cereals
+Rice/Grains
+Ready Made
+Baby Care
+Baby Food
+Hygiene products
+Cleaning
+Household
+Drinks
+Snacks
+Baking/Cooking
+Skin Care/Beauty

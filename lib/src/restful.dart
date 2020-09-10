@@ -85,6 +85,9 @@ class Api implements _Api {
       var reqMsg='${request.method} ${request.requestedUri}(${request.contentLength})';
 
       var response = request.response;
+
+      dynamic err;
+
       try {
         response.headers.contentType = ContentType.json;
         response.headers.add('Access-Control-Allow-Origin', '*');
@@ -104,13 +107,14 @@ class Api implements _Api {
             throw Exception('Unsupported request: ${request.method}.');
           }
         } catch (e) {
+          err=e;
           response.statusCode = HttpStatus.internalServerError;
           resBody = jsonEncode(Api.error(e.toString()));
         }
         response.write(resBody);
         await response.close();
 
-        print('${timestamp()} $reqMsg -> ${response.statusCode} (${response.contentLength})');
+        print('${timestamp()} $reqMsg -> ${response.statusCode} (${response.contentLength}) ${err!=null?'error:$err':''} ');
 
       } catch (e) {
         print('error:$e');

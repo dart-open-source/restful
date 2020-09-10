@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:restful/restful.dart';
 
-import 'api/HomeApi.dart';
+import 'api/BaseApi.dart';
 import 'api/UserApi.dart';
 import 'api/SystemApi.dart';
 
@@ -19,10 +19,8 @@ Api routerMap(Uri uri) {
     case 'system':
       return SystemApi();
   }
-  return HomeApi();
+  return BaseApi();
 }
-
-
 
 final App = _App();
 
