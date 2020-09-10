@@ -16,6 +16,7 @@ class _Dao {
   DbCollection get category => db.collection('category');
   DbCollection get product => db.collection('product');
   DbCollection get feedback => db.collection('feedback');
+  DbCollection get order => db.collection('order');
 
   Future connect() async {
     if (!_isDbOpen) await db.open();

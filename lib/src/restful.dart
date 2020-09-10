@@ -27,8 +27,8 @@ class Api implements _Api {
 
   Map post;
 
-  bool postHas(String val,[String key='type']) => postContainsKey(key)&&post[key]==val;
-  bool postContainsKey(String key) => post!=null&&post.containsKey(key);
+  bool postKeyVal(String val,[String key='type']) => postKey(key)&&post[key]==val;
+  bool postKey(String key) => post!=null&&post.containsKey(key);
 
   @override
   void init() {}

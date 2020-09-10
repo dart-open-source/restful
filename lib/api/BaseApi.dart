@@ -1,3 +1,5 @@
+import 'package:restful/global.dart';
+
 import '../app.dart';
 
 class BaseApi extends Api {
@@ -6,6 +8,7 @@ class BaseApi extends Api {
         'category': category,
         'product': product,
         'feedback': feedback,
+        'order': order,
       };
 
   Future<dynamic> category() async {
@@ -38,8 +41,8 @@ class BaseApi extends Api {
     var outputs = [];
 
     ///==============for home
-    if (postHas('home')) outputs = cates.sublist(0, 5);
-    if (postHas('all')) outputs = cates;
+    if (postKeyVal('home')) outputs = cates.sublist(0, 5);
+    if (postKeyVal('all')) outputs = cates;
     return Api.success(outputs);
   }
 
@@ -110,7 +113,7 @@ class BaseApi extends Api {
     });
 
     var outputs = [];
-    if (postContainsKey('id')) {
+    if (postKey('id')) {
       cates.forEach((element) {
         if (element['category'] == post['id']) {
           outputs.add(element);
@@ -119,11 +122,38 @@ class BaseApi extends Api {
     }
 
     ///==============for home
-    if (postHas('home')) {
+    if (postKeyVal('home')) {
       outputs = cates.sublist(0, 4);
     }
 
     return Api.success(outputs);
+  }
+
+  Future<dynamic> order() async {
+    if (postKey('user') && postKey('address') && postKey('orders')) {
+      await Dao.connect();
+      post['request'] = requestInfo;
+      post['id'] = timeymd().replaceAll('-', '') + (await Dao.order.count()).toString();
+      post['time'] = timestampStr();
+      var total=0;
+      var orders=post['orders'];
+      if(orders is List){
+        for(var _order in orders){
+          var _orderInfo=Map.from(_order);
+          if(_orderInfo.containsKey('price')){
+            total+=any2int(_orderInfo['price']);
+          }
+        }
+      }
+      post['total'] = total;
+      post['payment'] = 'COD';
+      post['status'] = 'Your Order has been Placed!!!';
+      post['deliver'] = 'To Deliver On : ${randomListElement(['today', 'yesterday', '3 hours', '24 minute'])}';
+
+      await Dao.order.insert(post);
+      return Api.success({'id': post['id']});
+    }
+    return Api.error('data error');
   }
 
   Future<dynamic> feedback() async {
