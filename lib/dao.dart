@@ -14,6 +14,8 @@ class _Dao {
   DbCollection get loginLog => db.collection('loginLog');
   DbCollection get user => db.collection('user');
   DbCollection get category => db.collection('category');
+  DbCollection get product => db.collection('product');
+  DbCollection get feedback => db.collection('feedback');
 
   Future connect() async {
     if (!_isDbOpen) await db.open();

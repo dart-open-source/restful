@@ -27,6 +27,9 @@ class Api implements _Api {
 
   Map post;
 
+  bool postHas(String val,[String key='type']) => postContainsKey(key)&&post[key]==val;
+  bool postContainsKey(String key) => post!=null&&post.containsKey(key);
+
   @override
   void init() {}
 
@@ -34,6 +37,7 @@ class Api implements _Api {
     dynamic map = {};
     map['ip'] = '${request.connectionInfo.remoteAddress.host}:${request.connectionInfo.remotePort}';
     map['header'] = '${request.headers}';
+    map['time'] = timedate();
     return map;
   }
 
@@ -98,7 +102,11 @@ class Api implements _Api {
           if (request.method == 'POST' || request.method == 'GET') {
             Map post;
             if (request.method == 'POST') {
-              post = jsonDecode(await utf8.decoder.bind(request).join());
+              try{
+                post = jsonDecode(await utf8.decoder.bind(request).join());
+              }catch(e){
+                post=null;
+              }
             }
             final api = routeMap(request.requestedUri);
             resBody = await api.enter(request, post);

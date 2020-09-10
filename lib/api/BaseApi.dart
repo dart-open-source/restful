@@ -1,11 +1,11 @@
-import 'dart:math';
-
 import '../app.dart';
 
 class BaseApi extends Api {
   @override
   Map<String, kApiMethod> get allows => {
         'category': category,
+        'product': product,
+        'feedback': feedback,
       };
 
   Future<dynamic> category() async {
@@ -28,14 +28,111 @@ class BaseApi extends Api {
       {'name': 'Snacks', 'pic': 'assets/images/snacks.jpg', 'type': 0, 'id': 16},
       {'name': 'Baking/Cooking', 'pic': 'assets/images/eggs.jpg', 'type': 0, 'id': 17},
       {'name': 'SkinCare/Beauty', 'pic': 'assets/images/be.jpg', 'type': 0, 'id': 18},
-      {'name': 'Fresh Produce', 'pic': 'assets/images/groceries.jpg', 'type': 0, 'id': 19}
     ];
-
     await Dao.connect();
     await Dao.category.drop();
     cates.forEach((element) {
       Dao.category.insert(Map.from(element));
     });
-    return Api.success(cates);
+
+    var outputs = [];
+
+    ///==============for home
+    if (postHas('home')) outputs = cates.sublist(0, 5);
+    if (postHas('all')) outputs = cates;
+    return Api.success(outputs);
+  }
+
+  Future<dynamic> product() async {
+    var cates = <Map>[
+      {
+        'category': 1,
+        'pic': 'assets/images/apple.jpg',
+        'name': 'Apple',
+        'price': '10',
+        'items': [
+          {'name': '1Box Case30', 'price': '30'},
+          {'name': '2Box Case50', 'price': '50'},
+        ],
+        'id': 1,
+      },
+      {
+        'category': 1,
+        'pic': 'assets/images/lemons.jpg',
+        'name': 'Lemons',
+        'price': '10',
+        'items': [
+          {'name': '1Box Case', 'price': '30'},
+          {'name': '2Box Case', 'price': '50'},
+        ],
+        'id': 2,
+      },
+      {
+        'category': 2,
+        'pic': 'assets/images/nonveg.jpg',
+        'name': 'Meat',
+        'price': '10',
+        'id': 3,
+      },
+      {
+        'category': 1,
+        'pic': 'assets/images/kiwi.jpg',
+        'name': 'KiwiFruit',
+        'price': '10',
+        'id': 4,
+      },
+      {
+        'category': 1,
+        'pic': 'assets/images/guava.jpg',
+        'name': 'Guava',
+        'price': '10',
+        'id': 5,
+      },
+      {
+        'category': 1,
+        'pic': 'assets/images/grapes.jpg',
+        'name': 'Grapes',
+        'price': '10',
+        'id': 6,
+      },
+      {
+        'category': 1,
+        'pic': 'assets/images/pineapple.jpg',
+        'name': 'Pineapple',
+        'price': '10',
+        'id': 7,
+      },
+    ];
+    await Dao.connect();
+    await Dao.product.drop();
+    cates.forEach((element) {
+      Dao.product.insert(Map.from(element));
+    });
+
+    var outputs = [];
+    if (postContainsKey('id')) {
+      cates.forEach((element) {
+        if (element['category'] == post['id']) {
+          outputs.add(element);
+        }
+      });
+    }
+
+    ///==============for home
+    if (postHas('home')) {
+      outputs = cates.sublist(0, 4);
+    }
+
+    return Api.success(outputs);
+  }
+
+  Future<dynamic> feedback() async {
+    if (post != null) {
+      await Dao.connect();
+      post['request'] = requestInfo;
+      await Dao.feedback.insert(post);
+      return Api.success('Thanks for your feeds!');
+    }
+    return Api.error('data error');
   }
 }
