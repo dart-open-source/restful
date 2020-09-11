@@ -1,3 +1,4 @@
+import 'package:mongo_dart/mongo_dart.dart';
 import 'package:restful/global.dart';
 
 import '../app.dart';
@@ -130,28 +131,31 @@ class BaseApi extends Api {
   }
 
   Future<dynamic> order() async {
-    if (postKey('user') && postKey('address') && postKey('orders')) {
+    if(isGet){
+      await Dao.connect();
+      var list=await Dao.order.find();
+      var outs=<Map>[];
+      await list.forEach((element) {
+        element.remove('request');
+        element.remove('_id');
+        outs.add(element);
+      });
+      return Api.success(outs);
+    }
+    if (isPost&&postKey('user') && postKey('address') && postKey('orders')) {
       await Dao.connect();
       post['request'] = requestInfo;
       post['id'] = timeymd().replaceAll('-', '') + (await Dao.order.count()).toString();
       post['time'] = timestampStr();
-      var total=0;
-      var orders=post['orders'];
-      if(orders is List){
-        for(var _order in orders){
-          var _orderInfo=Map.from(_order);
-          if(_orderInfo.containsKey('price')){
-            total+=any2int(_orderInfo['price']);
-          }
-        }
-      }
-      post['total'] = total;
       post['payment'] = 'COD';
       post['status'] = 'Your Order has been Placed!!!';
       post['deliver'] = 'To Deliver On : ${randomListElement(['today', 'yesterday', '3 hours', '24 minute'])}';
 
       await Dao.order.insert(post);
-      return Api.success({'id': post['id']});
+      var res=Map.from(post);
+      res.remove('request');
+      res.remove('_id');
+      return Api.success(res);
     }
     return Api.error('data error');
   }

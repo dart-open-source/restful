@@ -29,6 +29,8 @@ class Api implements _Api {
 
   bool postKeyVal(String val,[String key='type']) => postKey(key)&&post[key]==val;
   bool postKey(String key) => post!=null&&post.containsKey(key);
+  bool get isGet => request.method=='GET';
+  bool get isPost => request.method=='POST';
 
   @override
   void init() {}
