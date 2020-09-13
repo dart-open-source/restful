@@ -95,13 +95,15 @@ class Api implements _Api {
       dynamic err;
 
       try {
-        response.headers.contentType = ContentType.json;
         response.headers.add('Access-Control-Allow-Origin', '*');
         response.headers.add('Access-Control-Allow-Methods', '*');
+        response.headers.add('Access-Control-Allow-Headers', '*');
         response.headers.add('Server', 'Dart-RestFul ${Api.version}');
         String resBody;
         try {
           if (request.method == 'POST' || request.method == 'GET') {
+
+            response.headers.contentType = ContentType.json;
             Map post;
             if (request.method == 'POST') {
               try{
@@ -114,7 +116,11 @@ class Api implements _Api {
             resBody = await api.enter(request, post);
             response.statusCode = HttpStatus.ok;
           } else {
-            throw Exception('Unsupported request: ${request.method}.');
+            if(request.method == 'OPTIONS'){
+              resBody='';
+            }else{
+              throw Exception('Unsupported request: ${request.method}.');
+            }
           }
         } catch (e) {
           err=e;

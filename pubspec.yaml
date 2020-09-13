@@ -7,7 +7,7 @@ homepage: https://github.com/almpazel/dart-restful
 ##
 ##
 ## dart lib/app.dart
-## nohup dart lib/app.dart > app.log 2>&1 &
+## nohup dart lib/app.dart > app-200912.log 2>&1 &
 ## 9031
 
 environment:
