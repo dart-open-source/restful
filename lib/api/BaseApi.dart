@@ -1,4 +1,3 @@
-import 'package:mongo_dart/mongo_dart.dart';
 import 'package:restful/global.dart';
 
 import '../app.dart';
@@ -42,7 +41,7 @@ class BaseApi extends Api {
     var outputs = [];
 
     ///==============for home
-    if (postKeyVal('home')) outputs = cates.sublist(0, 5);
+    if (postKeyVal('home')) outputs = cates.sublist(0, 12);
     if (postKeyVal('all')) outputs = cates;
     return Api.success(outputs);
   }
@@ -106,6 +105,83 @@ class BaseApi extends Api {
         'price': '10',
         'id': 7,
       },
+      {
+        'category': 12,
+        'pic': 'assets/images/dove-poder.jpg',
+        'name': 'Dove-powder (1.6oz)',
+        'price': '4.32',
+        'id': 8,
+      },
+      {
+        'category': 12,
+        'pic': 'assets/images/degree-powder.jpg',
+        'name': 'Degree Adrenaline Extreme (2.7oz)',
+        'price': '8.61',
+        'id': 9,
+      },
+      {
+        'category': 12,
+        'pic': 'assets/images/suave.jpg',
+        'name': 'Suave Conditioner Strawberry (15oz)',
+        'price': '3.50',
+        'id': 10,
+      },
+      {
+        'category': 12,
+        'pic': 'assets/images/suave-green.jpg',
+        'name': 'Suave Conditioner Green Apple (15oz)',
+        'price': '3.88',
+        'id': 11,
+      },
+      {
+        'category': 11,
+        'pic': 'assets/images/lactogen-3.jpg',
+        'name': 'Gentle Grown 3 (350g)',
+        'price': '6.25',
+        'id': 12,
+      },
+      {
+        'category': 11,
+        'pic': 'assets/images/banana-sitter.jpg',
+        'name': 'G Banana Orange Medley (2pk)',
+        'price': '1.97',
+        'id': 13,
+      },
+      {
+        'category': 11,
+        'pic': 'assets/images/good-care.jpg',
+        'name': 'Nestle 3 (2pk)',
+        'price': '23.05',
+        'id': 14,
+      },
+      {
+        'category': 10,
+        'pic': 'assets/images/dove-baby.jpg',
+        'name': 'Dove Baby Lotion (200ml)',
+        'price': '9.97',
+        'id': 15,
+      },
+      {
+        'category': 10,
+        'pic': 'assets/images/pull-ups.jpg',
+        'name': 'Huggies Pul-Ups 3T-4T (22ct)',
+        'price': '14.97',
+        'id': 16,
+      },
+      {
+        'category': 10,
+        'pic': 'assets/images/pull-ups-blue.jpg',
+        'name': 'Huggies Pul-Ups 2T-3T (25ct)',
+        'price': '14.97',
+        'id': 17,
+      },
+      {
+        'category': 10,
+        'pic': 'assets/images/ammens.jpg',
+        'name': 'Ammens Baby Powder (250g)',
+        'price': '10.49',
+        'id': 18,
+      },
     ];
     await Dao.connect();
     await Dao.product.drop();
@@ -124,7 +200,7 @@ class BaseApi extends Api {
 
     ///==============for home
     if (postKeyVal('home')) {
-      outputs = cates.sublist(0, 4);
+      outputs = cates.sublist(0);
     }
 
     return Api.success(outputs);
