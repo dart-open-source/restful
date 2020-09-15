@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:http/io_client.dart';
 import 'package:http/http.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 
@@ -9,9 +9,9 @@ import 'dao.dart';
 
 class Fetch {
   static Client get client => Client();
-  var headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36'};
+  static var headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36'};
 
-  Future<Map> getHome([int page = 1]) async {
+  static Future<Map> getHome([int page = 1]) async {
     var url = 'http://173.249.13.154:8089/app/gethomepage';
     var body = {'user_id': '22851', 'fname': 'Alm', 'email': 'almpazel@gmail.com', 'mobile': '13817767174', 'address': 'Gjjvc ', 'token': '37e03b18c2162fdb57b5674c51f2f2c760a188e3137b08d8bb41ee65812c92c3', 'pID': 'b49bea37-23d9-4763-ba46-a01144e943ea', 'page': page, 'delivery_option': ' '};
     var key = File('build/gethomepage-$page.json');
@@ -26,13 +26,50 @@ class Fetch {
     Map<String, dynamic> json = jsonDecode(res);
     return json;
   }
+  static Future<List> getPack(String id) async {
+    var url = 'http://173.249.13.154:8089/app/getItemPackages';
+    var body = {
+      "token": "cda9191f3c1f50573b67d73b333a13a255caebb32879c9f2ae6afac62cb9c247",
+      "user_id": "725",
+      "item_id": id
+    };
+    var key = File('build/packs/$id.json');
+    var res = '';
+    if (key.existsSync()) {
+      res = key.readAsStringSync();
+    } else {
+      var response = await client.post(url, headers: headers, body: jsonEncode(body));
+      res = utf8.decode(response.bodyBytes);
+      key.writeAsStringSync(res);
+    }
+    List json = jsonDecode(res);
+    return json;
+  }
 
+  static Future<void> goodsPacks() async {
+    App.init();
+    await Dao.connect();
+
+    var res=await Dao.items.find(where.eq('pack', null).limit(100));
+    await res.forEach((element) async {
+      if(!element.containsKey('pack')){
+        var list=await getPack(element['id']);
+        if(list!=null&&list is List){
+          element['pack']=list;
+          await Dao.items.update(where.eq('id', element['id']), element);
+        }
+        print('${element['id']}->$list');
+      }
+    });
+
+    //await Dao.close();
+  }
   static Future<void> homeGoods() async {
     App.init();
     await Dao.connect();
 
     for (var i = 1; i < 103; i++) {
-      var res = await Fetch().getHome(i);
+      var res = await Fetch.getHome(i);
       if (res != null && res.containsKey('HomeData')) {
         var list = res['HomeData'];
         if (list is List) {
@@ -55,53 +92,52 @@ class Fetch {
   static Future<void> itemimg()async {
 
     var url='http://173.249.13.154:8089/admin/itemimg/';
+//
+    var key = File('build/jsons/images.json');
+//    if(!key.existsSync()){
+//      var res=await client.get(url);
+//      if(res.statusCode==200) {
+//        key.writeAsBytesSync(res.bodyBytes);
+//      }
+//    }
+//    var m=RegExp(
+//        r'<a href="(.*)">(.*)</a>',
+//        multiLine: true,
+//        caseSensitive: true
+//    ).allMatches(key.readAsStringSync()).toList().sublist(2);
 
-    var key = File('build/img/-o.html');
-    if(!key.existsSync()){
-      var res=await client.get(url);
-      if(res.statusCode==200) {
-        key.writeAsBytesSync(res.bodyBytes);
-      }
-    }
-    var m=RegExp(
-        r'<a href="(.*)">(.*)</a>',
-        multiLine: true,
-        caseSensitive: true
-    ).allMatches(key.readAsStringSync()).toList().sublist(2);
-
-    var i=0;
+    Map red=jsonDecode(key.readAsStringSync());
+    var m=red['images'];
     var c=0;
     var t=m.length;
-
     print('t:$t');
-
-    for(var e in m){
-      var fi=e.group(1);
+    for(var fi in m){
       var key = File('build/img/${fi}');
       if (!key.existsSync()) {
-        var res=await client.get(url+fi);
+        var hc=HttpClient();
+        hc.findProxy = (Uri uri) => 'PROXY 127.0.0.1:1087;';
+        var res=await IOClient(hc).get(url+fi);
         if(res.statusCode==200){
-          i++;
           c++;
           key.writeAsBytesSync(res.bodyBytes);
         }
-        if(i>10){
-          print('per:${c/(t/100)}');
-          i=0;
-        }
+      }else{
+        c++;
       }
-      await Future.delayed(Duration(seconds: 1));
+      print('per:${c/(t/100)}');
+//      await Future.delayed(Duration(seconds: 1));
     }
-
   }
 }
 
 
 
-
-
-
-
 void main() async {
   await Fetch.itemimg();
+//  var server = await shelf_io.serve(
+//    proxyHandler('https://dart.dev'),
+//    'localhost',
+//    1080,
+//  );
+//  print('Proxying at http://${server.address.host}:${server.port}');
 }

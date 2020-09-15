@@ -24,5 +24,11 @@ class _Dao {
   }
 
   Future<Map> log(Map map, [String s = 'api']) => db.collection('log').insert({'type': s, 'data': map});
+
+  Future close() async {
+    try{
+      await db.close();
+    }catch(e){}
+  }
 }
 
