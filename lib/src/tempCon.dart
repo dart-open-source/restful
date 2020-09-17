@@ -12,7 +12,7 @@ case "\$1" in
         dart lib/app.dart stop
         ;;
     run)
-        nohup dart lib/app.dart "\$2" > "res/app-\$3.log" 2>&1 &
+        nohup dart lib/app.dart "\$2" > "\$3.log" 2>&1 &
         ;;
     status)
         dart lib/app.dart status
