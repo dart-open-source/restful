@@ -1,14 +1,10 @@
 name: restful
 description: A starting point for Dart Restful Api package, for Using Api(HTTP) to Easyly access server info, see demo or examples.
-version: 0.0.1
-homepage: https://github.com/almpazel/dart-restful
+version: 0.0.2
+homepage: https://gitee.com/almpazel/dart-restful
 
 ## pub publish --server=https://pub.dartlang.org
 ##
-##
-## dart lib/app.dart
-## nohup dart lib/app.dart > app-200914.log 2>&1 &
-## 19787
 
 environment:
   sdk: '>=2.8.1 <3.0.0'
