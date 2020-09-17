@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:restful/restful.dart';
+import 'package:restful/src/global.dart';
+import 'package:restful/src/tempCon.dart';
 
 import 'dao.dart';
 import 'src/processor.dart';
@@ -13,6 +15,11 @@ class _App {
 
   void init() async {
     print('init:${config}');
+
+    if(!File('cli').existsSync()){
+      File('cli').writeAsStringSync(tempCli.replaceAll('#head#', '#${timestampStr()}'));
+    }
+
     Dao.init();
   }
 
