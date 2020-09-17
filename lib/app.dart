@@ -23,19 +23,7 @@ class _App {
   void init() async {
     print('init:${config}');
 
-    if (File('.gitignore').existsSync()) {
-      var liens = File('.gitignore').readAsLinesSync();
-      if (!liens.contains(path)) {
-
-        var ignoreInfo=[
-          '',
-          '#$path at ${timestampStr()}',
-          path,
-          '',
-        ];
-        File('.gitignore').writeAsStringSync(ignoreInfo.join('\n'), mode: FileMode.append);
-      }
-    }
+    gitIgnoreUpdate(path);
 
     if (!file('cli').existsSync()) {
       file('cli').writeAsStringSync(tempCli.replaceAll('#head#', '#${timestampStr()}'));
@@ -57,4 +45,6 @@ class _App {
   Processor pro(List<String> arguments) => Processor(arguments,path);
 
   Future connect() async => await Dao.connect();
+
+
 }

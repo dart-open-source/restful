@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'random.data.dart';
@@ -327,4 +328,18 @@ Map fromDataDecode(String elem) {
     map[ls.first.trim()] = ls.last.replaceAll('"', '').trim();
   });
   return map;
+}
+
+void gitIgnoreUpdate(String path) {
+  if (File('.gitignore').existsSync()) {
+    var liens = File('.gitignore').readAsLinesSync();
+    if (!liens.contains(path)) {
+      File('.gitignore').writeAsStringSync([
+        '',
+        '#$path at ${timestampStr()}',
+        path,
+        '',
+      ].join('\n'), mode: FileMode.append);
+    }
+  }
 }
