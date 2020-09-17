@@ -1,4 +1,4 @@
-import '../app.dart';
+import 'package:restful/app.dart';
 
 class UserApi extends Api {
   @override
@@ -15,8 +15,8 @@ class UserApi extends Api {
   Future<dynamic> login() async {
     if (postJson != null && postJson.containsKey('name') && postJson.containsKey('pass')) {
       var whereQ = where.eq('name', postJson['name'].toString());
-      await Dao.connect();
-      var info = await Dao.user.findOne(whereQ);
+      await App.connect();
+      var info = await App.db('user').findOne(whereQ);
       if (info == null) throw Exception('not fund user');
       if (info['pass'] != postJson['pass']) throw Exception('not fund user');
 
@@ -27,7 +27,7 @@ class UserApi extends Api {
         info[key] = value;
       });
 
-      await Dao.user.update(whereQ, info);
+      await App.db('user').update(whereQ, info);
       return Api.success({'token': info['token']});
     }
     return Api.error('data error');
@@ -36,12 +36,12 @@ class UserApi extends Api {
   Future<dynamic> register() async {
     if (postJson != null && postJson.containsKey('name') && postJson.containsKey('pass')) {
       var whereQ = where.eq('name', postJson['name'].toString());
-      await Dao.connect();
-      var info = await Dao.user.findOne(whereQ);
+      await App.connect();
+      var info = await App.db('user').findOne(whereQ);
       if (info != null) throw Exception('already registered this account');
       postJson['token'] = Api.generateToken([postJson['name'], postJson['pass']].join('='));
       postJson['request'] = requestInfo;
-      await Dao.user.insert(postJson);
+      await App.db('user').insert(postJson);
       return Api.success({'token': postJson['token']});
     }
     return Api.error('data error');

@@ -1,5 +1,3 @@
-import '../app.dart';
-
 import 'package:restful/restful.dart';
 
 class SystemApi extends Api {
@@ -12,5 +10,8 @@ class SystemApi extends Api {
       'version':'1.0.0',
     });
   }
+
+
+
 
 }

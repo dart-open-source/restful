@@ -1,30 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
-import 'api/UserApi.dart';
-import 'api/SystemApi.dart';
+import 'package:restful/restful.dart';
 
-export 'dao.dart';
 import 'dao.dart';
-import 'src/restful.dart';
-export 'src/restful.dart';
-export 'package:mongo_dart/mongo_dart.dart';
-
-Api routerMap(HttpRequest request) {
-  switch (request.uri.pathSegments.first) {
-    case 'user':
-      return UserApi();
-    case 'system':
-      return SystemApi();
-  }
-  throw Exception('not defined Api.!?@!@#@# ');
-}
+export 'package:restful/restful.dart';
 
 final App = _App();
 
 class _App {
-  Map _config = {
-
-  };
+  Map _config = {};
 
   void init() async {
     print('init:${config}');
@@ -38,9 +22,10 @@ class _App {
     }
     return _config;
   }
+
+  DbCollection db(String s) => Dao.db.collection(s);
+
+  Future connect() async => await Dao.connect();
 }
 
-void main(List<String> arguments) async {
-  App.init();
-  await Api.start(routerMap, port: 30400);
-}
+

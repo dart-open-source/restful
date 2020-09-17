@@ -6,7 +6,7 @@ import 'global.dart';
 
 typedef kApiMethod = Future<dynamic> Function();
 typedef kPostMethod = bool Function(Map);
-typedef kRouteMethod = Api Function(HttpRequest);
+typedef kRouteMethod = dynamic Function(HttpRequest);
 
 abstract class _Api {
   HttpRequest request;
@@ -56,7 +56,7 @@ class Api implements _Api {
     return map;
   }
 
-  Future<dynamic> enter(HttpRequest request) async {
+  Future<String> enter(HttpRequest request) async {
     try {
       if (isPost && !isBoundary) {
         postJson = jsonDecode(await utf8.decoder.bind(request).join());
@@ -69,9 +69,12 @@ class Api implements _Api {
     var action = pathSegments.last;
     dynamic res;
     if (blocks.containsKey(action)) {
-      if (await headerCheckToken()) return error('token expired or need re login!');
-      await init();
-      res = await blocks[action]();
+      if (await headerCheckToken()){
+        res=error('token expired or need re login!');
+      }else{
+        await init();
+        res = await blocks[action]();
+      }
     } else if (allows.containsKey(action)) {
       await init();
       res = await allows[action]();
@@ -165,14 +168,24 @@ class Api implements _Api {
         String resBody;
         response.statusCode = HttpStatus.processing;
         try {
-          resBody = await routeMap(request).enter(request);
+          response.headers.contentType=ContentType.json;
+          var rs=routeMap(request);
+          if(rs is Api){
+            resBody = await rs.enter(request);
+          }else{
+            if(rs is String){
+              resBody = rs;
+            }else{
+              resBody = rs.toString();
+            }
+          }
           response.statusCode = HttpStatus.ok;
         } catch (e) {
           err = e;
           response.statusCode = HttpStatus.internalServerError;
           resBody = jsonEncode(Api.error(e.toString()));
         }
-        response.write(resBody);
+        if(resBody!=null) response.write(resBody);
         await response.close();
 
         print('${timestamp()} $reqMsg -> ${response.statusCode} (${response.contentLength}) ${err != null ? 'error:$err' : ''} ');
