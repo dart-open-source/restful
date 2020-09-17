@@ -1,39 +1,52 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:meta/meta.dart';
-import 'package:restful/global.dart';
+import 'package:mime/mime.dart';
+
+import 'global.dart';
 
 typedef kApiMethod = Future<dynamic> Function();
-typedef kRouteMethod = Api Function(Uri);
+typedef kPostMethod = bool Function(Map);
+typedef kRouteMethod = Api Function(HttpRequest);
 
 abstract class _Api {
   HttpRequest request;
 
-  String get token;
-
   Map<String, kApiMethod> allows = {};
   Map<String, kApiMethod> blocks = {};
 
-  void init();
+  Future<void> init();
 
-  @mustCallSuper
-  Future<dynamic> enter(HttpRequest request, Map post);
+  String get headerToken => request?.headers?.value('token');
 
-  Future<bool> tokenExpired();
+  Future<bool> headerCheckToken();
 }
 
 class Api implements _Api {
-  static var version = '0.0.1';
+  static Map error(dynamic s, {dynamic msg = 'error'}) => {'msg': msg, 'code': -1, 'result': s};
 
-  Map post;
+  static Map success(dynamic s, {dynamic msg = 'success'}) => {'msg': msg, 'code': 1, 'result': s};
 
-  bool postKeyVal(String val,[String key='type']) => postKey(key)&&post[key]==val;
-  bool postKey(String key) => post!=null&&post.containsKey(key);
-  bool get isGet => request.method=='GET';
-  bool get isPost => request.method=='POST';
+  static String generateToken(String pass, {Duration duration}) => tokenGen(pass, duration: duration ?? Duration(days: 7));
+
+  static bool expiredToken(String token, {Duration duration}) => tokenExpired(token);
+
+  dynamic postData;
+  Map postJson;
+
+  bool postKeyVal(String val, [String key = 'type']) => postKey(key) && postJson[key] == val;
+
+  bool postKey(String key) => postJson != null && postJson.containsKey(key);
+
+  bool get isGet => request.method == 'GET';
+
+  bool get isPost => request.method == 'POST';
+
+  bool get isBoundary => contentType.parameters.containsKey('boundary');
+
+  ContentType get contentType => request.headers.contentType;
 
   @override
-  void init() {}
+  Future<void> init() {}
 
   Map get requestInfo {
     dynamic map = {};
@@ -43,95 +56,126 @@ class Api implements _Api {
     return map;
   }
 
-  @override
-  Future<dynamic> enter(HttpRequest request, Map post) async {
+  Future<dynamic> enter(HttpRequest request) async {
+    try {
+      if (isPost && !isBoundary) {
+        postJson = jsonDecode(await utf8.decoder.bind(request).join());
+      }
+    // ignore: empty_catches
+    } catch (e) {}
+
     this.request = request;
-    this.post = post;
     var pathSegments = request.requestedUri.pathSegments;
     var action = pathSegments.last;
     dynamic res;
     if (blocks.containsKey(action)) {
-      if (await tokenExpired()) return Api.errorToken();
+      if (await headerCheckToken()) return error('token expired or need re login!');
       await init();
-      res=await blocks[action]();
+      res = await blocks[action]();
     } else if (allows.containsKey(action)) {
       await init();
-      res=await allows[action]();
+      res = await allows[action]();
     } else {
-      res=error('$action not found in [$runtimeType]');
+      res = error('$action not found in [$runtimeType]');
     }
     return jsonEncode(res);
   }
 
-  static Map error(dynamic s, {dynamic msg = 'error'}) {
-    return {'msg': msg, 'code': -1, 'result': s};
+  Future<Map> postMultiPart([Map<String, kPostMethod> listFiles]) async {
+    Map<String, dynamic> postM;
+    var _listFiles = listFiles ?? {};
+    try {
+      if (isBoundary) {
+        var boundary = contentType.parameters['boundary'];
+        var rs = MimeMultipartTransformer(boundary).bind(request);
+        postM = {};
+        await rs.forEach((element) async {
+          try {
+            if (element.headers.containsKey('content-disposition')) {
+              var mp = fromDataDecode(element.headers['content-disposition']);
+              if (mp.containsKey('name')) {
+                var name = mp['name'];
+                if (mp.length == 1) {
+                  postM[name] = await utf8.decoder.bind(element).join();
+                } else {
+                  if (_listFiles.containsKey(name)) {
+                    postM[name] = <String, dynamic>{};
+                    mp.forEach((key, value) {
+                      postM[name][key] = value;
+                    });
+                    element.headers.forEach((key, value) {
+                      postM[name][key] = value;
+                    });
+                    if (_listFiles[name](postM[name])) {
+                      var byteList = await element.toList();
+                      var bytes = <int>[];
+                      byteList.forEach((iterable) {
+                        bytes.addAll(iterable);
+                      });
+                      postM[name]['bytes'] = bytes;
+                    }
+                  } else {
+                    postM[name] = <String, dynamic>{};
+                    mp.forEach((key, value) {
+                      postM[name][key] = value;
+                    });
+                  }
+                }
+              }
+            }
+          } catch (e) {
+            print('Api.postMultiPart error $e ${element.headers}');
+          }
+        });
+        if(postM.isEmpty) postM=null;
+      }
+    } catch (e) {
+      print('Api.postMultiPart error $e');
+      postM = null;
+    }
+    return postM;
   }
 
-  static Map errorToken() {
-    return error('token expired or need re login!');
-  }
-
-  static Map success(dynamic s, {dynamic msg = 'success'}) {
-    return {'msg': msg, 'code': 1, 'result': s};
-  }
-
-  @override
-  Future<bool> tokenExpired() async {
-    if (token == null) return true;
-    return false;
-  }
-
-  static void start(kRouteMethod routeMap, {int port = 4040, Future<void> onStart, Future<void> onClose, Function onUpdate}) async {
+  static void start(kRouteMethod routeMap, {int port = 4040, Future<void> onStart, Future<void> onClose, Function onUpdate,Map<String,String> responseHeaders}) async {
     var server = await HttpServer.bind('0.0.0.0', port);
     if (onStart != null) await onStart;
-    print('Listening on http://${server.address.host}:${server.port}/system/info');
+
+    print('Listening on http://${server.address.host}:${server.port}/');
+
+    var _responseHeaders=responseHeaders??{
+      'Access-Control-Allow-Origin':'*',
+      'Access-Control-Allow-Methods':'*',
+      'Access-Control-Allow-Headers':'*',
+    };
+
     await for (HttpRequest request in server) {
       if (onUpdate != null) onUpdate();
 
-      var reqMsg='${request.method} ${request.requestedUri}(${request.contentLength})';
+      var reqMsg = '${request.method} ${request.requestedUri}(${request.contentLength})';
 
       var response = request.response;
 
       dynamic err;
 
       try {
-        response.headers.add('Access-Control-Allow-Origin', '*');
-        response.headers.add('Access-Control-Allow-Methods', '*');
-        response.headers.add('Access-Control-Allow-Headers', '*');
-        response.headers.add('Server', 'Dart-RestFul ${Api.version}');
+        _responseHeaders.forEach((key, value) {
+          response.headers.add(key, value);
+        });
+        response.headers.add('Server', 'Dart-Restful:1.0.0;Author:almpazel@gmail.com;Date:2020-2025;');
         String resBody;
+        response.statusCode = HttpStatus.processing;
         try {
-          if (request.method == 'POST' || request.method == 'GET') {
-
-            response.headers.contentType = ContentType.json;
-            Map post;
-            if (request.method == 'POST') {
-              try{
-                post = jsonDecode(await utf8.decoder.bind(request).join());
-              }catch(e){
-                post=null;
-              }
-            }
-            final api = routeMap(request.requestedUri);
-            resBody = await api.enter(request, post);
-            response.statusCode = HttpStatus.ok;
-          } else {
-            if(request.method == 'OPTIONS'){
-              resBody='';
-            }else{
-              throw Exception('Unsupported request: ${request.method}.');
-            }
-          }
+          resBody = await routeMap(request).enter(request);
+          response.statusCode = HttpStatus.ok;
         } catch (e) {
-          err=e;
+          err = e;
           response.statusCode = HttpStatus.internalServerError;
           resBody = jsonEncode(Api.error(e.toString()));
         }
         response.write(resBody);
         await response.close();
 
-        print('${timestamp()} $reqMsg -> ${response.statusCode} (${response.contentLength}) ${err!=null?'error:$err':''} ');
-
+        print('${timestamp()} $reqMsg -> ${response.statusCode} (${response.contentLength}) ${err != null ? 'error:$err' : ''} ');
       } catch (e) {
         print('error:$e');
       }
@@ -149,5 +193,8 @@ class Api implements _Api {
   HttpRequest request;
 
   @override
-  String get token => request?.headers?.value('token');
+  String get headerToken => request?.headers?.value('token');
+
+  @override
+  Future<bool> headerCheckToken() async => true;
 }

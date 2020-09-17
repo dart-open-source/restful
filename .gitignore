@@ -5,6 +5,7 @@
 .gradle/
 .config.json
 gradle/
+lib/test/
 gradlew
 gradlew.bat
 # Omit commiting pubspec.lock for library packages:

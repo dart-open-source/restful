@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
-import 'data/random.data.dart';
+import 'random.data.dart';
 
 const bool isWeb = identical(0, 0.0);
 
@@ -294,12 +294,12 @@ String randomAddress() => '#${kRandom.nextInt(9999)} ${randomBahamaArea()}';
 
 String tokenGen(String pass, {Duration duration}) {
   var time = duration ?? Duration(days: 7);
-  return str2base64('$pass:' + time.inMilliseconds.toString() + ":${timeint()}");
+  return str2base64([pass,time.inMilliseconds.toString(),timeint().toString()].join(':'));
 }
 
-bool tokenCheck(String token) {
+bool tokenExpired(String token) {
   try {
-    var tokens = base642str(token).split(":");
+    var tokens = base642str(token).split(':');
     var now = timeint();
     var expire = int.parse(tokens[1]);
     var time = int.parse(tokens[2]);
@@ -316,4 +316,15 @@ int lerpInt(int minV, int maxV, int value) {
 String firstUpperCase(String str) {
   if (str.length > 1) return (str.substring(0, 1).toUpperCase()) + str.substring(1);
   return str;
+}
+
+Map fromDataDecode(String elem) {
+  var map = {};
+  elem = elem.replaceAll('form-data; ', '');
+  var list = elem.split(';');
+  list.forEach((element) {
+    var ls = element.split('=');
+    map[ls.first.trim()] = ls.last.replaceAll('"', '').trim();
+  });
+  return map;
 }

@@ -1,31 +1,30 @@
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:restful/restful.dart';
-
-import 'api/BaseApi.dart';
 import 'api/UserApi.dart';
 import 'api/SystemApi.dart';
 
 export 'dao.dart';
 import 'dao.dart';
-import 'restful.dart';
-export 'restful.dart';
+import 'src/restful.dart';
+export 'src/restful.dart';
+export 'package:mongo_dart/mongo_dart.dart';
 
-Api routerMap(Uri uri) {
-  switch (uri.pathSegments.first) {
+Api routerMap(HttpRequest request) {
+  switch (request.uri.pathSegments.first) {
     case 'user':
       return UserApi();
     case 'system':
       return SystemApi();
   }
-  return BaseApi();
+  throw Exception('not defined Api.!?@!@#@# ');
 }
 
 final App = _App();
 
 class _App {
-  Map _config = {'mongodb': 'mongodb://127.0.0.1:27017/test'};
+  Map _config = {
+
+  };
 
   void init() async {
     print('init:${config}');
