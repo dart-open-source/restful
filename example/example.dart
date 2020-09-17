@@ -15,6 +15,10 @@ dynamic routerMap(HttpRequest request) {
 }
 
 void main(List<String> arguments) async {
+
+  var pro = App.pro(arguments);
+  if (!await pro.needRun()) return;
+
   App.init();
   await Api.start(routerMap, port: 30400);
 }

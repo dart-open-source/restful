@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:restful/restful.dart';
 
 import 'dao.dart';
+import 'src/processor.dart';
 export 'package:restful/restful.dart';
 
 final App = _App();
@@ -25,7 +26,7 @@ class _App {
 
   DbCollection db(String s) => Dao.db.collection(s);
 
+  Processor pro(List<String> arguments) => Processor(arguments);
+
   Future connect() async => await Dao.connect();
 }
-
-

@@ -2,13 +2,16 @@
 
 case "$1" in
     start)
-        dart lib/main.dart start
+        dart lib/app.dart start
         ;;
     stop)
-        dart lib/main.dart stop
+        dart lib/app.dart stop
+        ;;
+    run)
+        nohup dart lib/app.dart "$2" > "res/app-$3.log" 2>&1 &
         ;;
     status)
-         echo "normal"
+        dart lib/app.dart status
         ;;
     restart)
         $0 stop

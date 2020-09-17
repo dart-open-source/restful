@@ -4,13 +4,11 @@ import 'global.dart';
 
 
 class Processor{
-  List<String> arguments=[];
+  List<String> arguments;
 
   static String PROCESS_NAME='DART#RESTFUL#ALM';
 
-  Processor(List<String> arguments){
-    this.arguments=arguments;
-  }
+  Processor(this.arguments);
 
   int pidOld([int r]){
     var pidFile=File('.pid');

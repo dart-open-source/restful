@@ -4,6 +4,7 @@
 .idea/
 .gradle/
 .config.json
+.pid
 gradle/
 lib/test/
 gradlew
