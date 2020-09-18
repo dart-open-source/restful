@@ -1,7 +1,8 @@
 import 'dart:io';
-import 'package:restful/app.dart';
+import 'package:restful/restful.dart';
 import 'api/SystemApi.dart';
 import 'api/UserApi.dart';
+export 'package:restful/restful.dart';
 
 dynamic routerMap(HttpRequest request) {
   var action = request.uri.pathSegments.isNotEmpty ? request.uri.pathSegments.first : 'none';

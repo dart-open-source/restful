@@ -1,4 +1,5 @@
-import 'package:restful/app.dart';
+
+import '../example.dart';
 
 class UserApi extends Api {
   @override

@@ -8,7 +8,7 @@ restful api for small things...
 
 
 ```dart
-import 'package:restful/restful.dart';
+import 'package:restful/restful_iml.dart';
 
 //Change routes and actions
   

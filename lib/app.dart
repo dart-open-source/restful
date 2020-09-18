@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:restful/restful.dart';
-import 'package:restful/src/global.dart';
-import 'package:restful/src/tempCon.dart';
+import 'package:mongo_dart/mongo_dart.dart';
 
+import 'global.dart';
+import 'restful_iml.dart';
+import 'tempCon.dart';
 import 'dao.dart';
-import 'src/processor.dart';
-export 'package:restful/restful.dart';
+import 'processor.dart';
 
 final App = _App();
 
@@ -28,8 +28,9 @@ class _App {
     if (!file('cli').existsSync()) {
       file('cli').writeAsStringSync(tempCli.replaceAll('#head#', '#${timestampStr()}'));
     }
-
-    Dao.init();
+    if(config.containsKey('mongodb')) {
+      Dao.init(config['mongodb']);
+    }
   }
 
   Map get config {
@@ -45,6 +46,8 @@ class _App {
   Processor pro(List<String> arguments) => Processor(arguments,path);
 
   Future connect() async => await Dao.connect();
+
+  void start(kRouteMethod routerMap, {int port}) async =>Api.start(routerMap,port: port);
 
 
 }

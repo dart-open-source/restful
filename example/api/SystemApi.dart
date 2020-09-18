@@ -1,4 +1,4 @@
-import 'package:restful/restful.dart';
+import '../example.dart';
 
 class SystemApi extends Api {
 
