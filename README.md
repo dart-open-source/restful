@@ -38,14 +38,12 @@ void main(List<String> arguments) async {
   if (!await pro.needRun()) return;
 
   App.init();
-  await Api.start(routerMap, port: 30400);
+  await Api.start(routerMap, port: 4040);
 }
 
 ```
 
-
-Listening on http://0.0.0.0:4040/system/info
-
+Listening on http://127.0.0.1:4040/
 
 ## Usage
 

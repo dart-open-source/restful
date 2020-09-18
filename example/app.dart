@@ -26,5 +26,5 @@ void main(List<String> arguments) async {
   if (!await pro.needRun()) return;
 
   App.init();
-  await Api.start(routerMap, port: 30400);
+  await Api.start(routerMap, port: 4040);
 }
