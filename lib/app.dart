@@ -41,7 +41,7 @@ class _App {
     return _config;
   }
 
-  DbCollection db(String s) => Dao.db.collection(s);
+  DbCollection db(String collection) => Dao.db.collection(collection);
 
   Processor pro(List<String> arguments) => Processor(arguments,path);
 

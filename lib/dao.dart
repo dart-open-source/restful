@@ -1,7 +1,5 @@
 import 'package:mongo_dart/mongo_dart.dart';
 
-import 'app.dart';
-
 final Dao = _Dao();
 
 class _Dao {
