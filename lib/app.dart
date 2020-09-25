@@ -23,10 +23,10 @@ class _App {
   void init() async {
     print('init:${config}');
 
-    gitIgnoreUpdate(path);
+    Alm.gitIgnoreUpdate(path);
 
     if (!file('cli').existsSync()) {
-      file('cli').writeAsStringSync(tempCli.replaceAll('#head#', '#${timestampStr()}'));
+      file('cli').writeAsStringSync(tempCli.replaceAll('#head#', '#${Alm.timestampStr()}'));
     }
     if(config.containsKey('mongodb')) {
       Dao.init(config['mongodb']);

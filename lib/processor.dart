@@ -19,7 +19,7 @@ class Processor {
       pidFile.writeAsStringSync(r.toString());
       return r;
     }
-    return pidFile.existsSync() ? any2int(pidFile.readAsStringSync()) : -1;
+    return pidFile.existsSync() ? Alm.any2int(pidFile.readAsStringSync()) : -1;
   }
 
   Future<bool> isPidRunning(int id, {bool log = false}) async {
@@ -36,7 +36,7 @@ class Processor {
     if (await isPidRunning(_pidOld)) {
       print('already start at:$_pidOld');
     } else {
-      var cmd = '$root/cli lib/app.dart ${PROCESS_NAME} $root/${timeymd()}'.replaceAll('//', '/');
+      var cmd = '$root/cli lib/app.dart ${PROCESS_NAME} $root/${Alm.timeymd()}'.replaceAll('//', '/');
       print('cmd:$cmd');
       var res = await pr.run('sh', cmd.split(' '));
       print('stdout:${res.stdout}');
