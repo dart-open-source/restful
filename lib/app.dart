@@ -23,12 +23,12 @@ class _App {
   void init() async {
     print('init:${config}');
 
-    Alm.gitIgnoreUpdate(path);
+    Alm.gitIgnoreUpdate(File('.gitignore'), path);
 
-    if (!file('cli').existsSync()) {
-      file('cli').writeAsStringSync(tempCli.replaceAll('#head#', '#${Alm.timestampStr()}'));
+    if (!App.file('cli').existsSync()) {
+      App.file('cli').writeAsStringSync(tempCli.replaceAll('#head#', '#${Alm.timestampStr()}'));
     }
-    if(config.containsKey('mongodb')) {
+    if (config.containsKey('mongodb')) {
       Dao.init(config['mongodb']);
     }
   }
@@ -43,11 +43,9 @@ class _App {
 
   DbCollection db(String collection) => Dao.db.collection(collection);
 
-  Processor pro(List<String> arguments) => Processor(arguments,path);
+  Processor pro(List<String> arguments) => Processor(arguments, path);
 
   Future connect() async => await Dao.connect();
 
-  void start(kRouteMethod routerMap, {int port}) async =>Api.start(routerMap,port: port);
-
-
+  void start(kRouteMethod routerMap, {int port}) async => Api.start(routerMap, port: port);
 }
