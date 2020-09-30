@@ -26,21 +26,19 @@ class Api implements _Api {
 
   static Map success(dynamic s, {dynamic msg = 'success'}) => {'msg': msg, 'code': 1, 'result': s};
 
-  static String generateToken(String pass, {Duration duration}) => tokenGen(pass, duration: duration ?? Duration(days: 7));
-
-  static bool expiredToken(String token, {Duration duration}) => tokenExpired(token);
+  static String generateToken(String pass, {Duration duration}) => Alm.tokenGen(pass, duration: duration);
+  static bool expiredToken(String token, {Duration duration}) => Alm.tokenExpired(token);
+  static Map decodeToken(String token) => Alm.tokenDecode(token);
 
   dynamic postData;
   Map postJson;
   Map user={};
 
-  bool postKeyVal(String val, [String key = 'type']) => postKey(key) && postJson[key] == val;
+  bool get isGet => method == 'GET';
 
-  bool postKey(String key) => postJson != null && postJson.containsKey(key);
+  bool get isPost => method == 'POST';
 
-  bool get isGet => request.method == 'GET';
-
-  bool get isPost => request.method == 'POST';
+  String get method => request.method??'GET';
 
   bool get isBoundary => contentType.parameters.containsKey('boundary');
 
@@ -55,20 +53,19 @@ class Api implements _Api {
     dynamic map = {};
     map['ip'] = '${request.connectionInfo.remoteAddress.host}:${request.connectionInfo.remotePort}';
     map['header'] = '${request.headers}';
-    map['time'] = timedate();
+    map['time'] = Alm.timedate();
     return map;
   }
 
   Future<String> enter(HttpRequest request) async {
     this.request = request;
-
     try {
-      if (isPost && !isBoundary) {
+      if (isPost && contentType.mimeType.toLowerCase()==ContentType.json.mimeType.toLowerCase()) {
         postJson = jsonDecode(await utf8.decoder.bind(request).join());
       }
-    // ignore: empty_catches
-    } catch (e) {}
-
+    } catch (e) {
+      return jsonEncode(error('Data?! json decode error'));
+    }
     var pathSegments = request.requestedUri.pathSegments;
     var action = pathSegments.last;
     dynamic res;
@@ -99,7 +96,7 @@ class Api implements _Api {
         await rs.forEach((element) async {
           try {
             if (element.headers.containsKey('content-disposition')) {
-              var mp = fromDataDecode(element.headers['content-disposition']);
+              var mp = Alm.fromDataDecode(element.headers['content-disposition']);
               if (mp.containsKey('name')) {
                 var name = mp['name'];
                 if (mp.length == 1) {
@@ -192,7 +189,7 @@ class Api implements _Api {
         if(resBody!=null) response.write(resBody);
         await response.close();
 
-        print('${timestamp()} $reqMsg -> ${response.statusCode} (${response.contentLength}) ${err != null ? 'error:$err' : ''} ');
+        print('${Alm.timestamp()} $reqMsg -> ${response.statusCode} (${response.contentLength}) ${err != null ? 'error:$err' : ''} ');
       } catch (e) {
         print('error:$e');
       }
@@ -211,8 +208,6 @@ class Api implements _Api {
 
   @override
   String get headerToken => request?.headers?.value('token');
-  String get token => headerToken;
-
 
   @override
   Future<bool> headerCheckToken() async => true;
