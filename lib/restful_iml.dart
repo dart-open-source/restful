@@ -60,6 +60,8 @@ class Api implements _Api {
   }
 
   Future<String> enter(HttpRequest request) async {
+    this.request = request;
+
     try {
       if (isPost && !isBoundary) {
         postJson = jsonDecode(await utf8.decoder.bind(request).join());
@@ -67,7 +69,6 @@ class Api implements _Api {
     // ignore: empty_catches
     } catch (e) {}
 
-    this.request = request;
     var pathSegments = request.requestedUri.pathSegments;
     var action = pathSegments.last;
     dynamic res;
