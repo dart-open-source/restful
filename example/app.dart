@@ -13,15 +13,12 @@ dynamic routerMap(HttpRequest request) {
   switch (action) {
     case 'user':
       return UserApi();
-    case 'system':
-      return SystemApi();
   }
-  throw Exception('not defined Api.${action} !?@!@#@# ');
+  return SystemApi();
 }
 
 void main(List<String> arguments) async {
   ///path setup
-  App.path = '.restful/';
   Pro.path = '.restful/';
 
   /// actions start stop restart available

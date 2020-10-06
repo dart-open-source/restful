@@ -18,3 +18,6 @@ build/
 
 # Directory created by dartdoc
 doc/api/
+
+#.restful/ at 2020-10-06 17:41:10
+.restful/

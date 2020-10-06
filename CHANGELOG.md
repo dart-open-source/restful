@@ -1,3 +1,4 @@
+## 0.0.3
 ## 0.0.2
 - more functionality, see example/ folder
 

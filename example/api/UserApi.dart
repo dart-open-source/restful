@@ -14,42 +14,40 @@ class UserApi extends Api {
   };
 
   Future<dynamic> login() async {
-    if (postJson != null && postJson.containsKey('name') && postJson.containsKey('pass')) {
-      var whereQ = where.eq('name', postJson['name'].toString());
-      await App.connect();
-      var info = await App.db('user').findOne(whereQ);
-      if (info == null) throw Exception('not fund user');
-      if (info['pass'] != postJson['pass']) throw Exception('not fund user');
+    if (Alm.isMap(postJson,['name','pass'])) {
 
+      //todo check user
+
+      var info = {};
       info['token'] = Api.generateToken([postJson['name'], postJson['pass']].join('='));
       info['request'] = requestInfo;
-
       postJson.forEach((key, value) {
         info[key] = value;
       });
-
-      await App.db('user').update(whereQ, info);
-      return Api.success({'token': info['token']});
+      return Alm.success(info);
     }
-    return Api.error('data error');
+    return Alm.error('data error');
   }
 
   Future<dynamic> register() async {
-    if (postJson != null && postJson.containsKey('name') && postJson.containsKey('pass')) {
-      var whereQ = where.eq('name', postJson['name'].toString());
-      await App.connect();
-      var info = await App.db('user').findOne(whereQ);
-      if (info != null) throw Exception('already registered this account');
-      postJson['token'] = Api.generateToken([postJson['name'], postJson['pass']].join('='));
-      postJson['request'] = requestInfo;
-      await App.db('user').insert(postJson);
-      return Api.success({'token': postJson['token']});
+    if (Alm.isMap(postJson,['name','pass'])) {
+      //todo check user
+
+      var info = {};
+      info['token'] = Api.generateToken([postJson['name'], postJson['pass']].join('='));
+      info['request'] = requestInfo;
+      postJson.forEach((key, value) {
+        info[key] = value;
+      });
+      return Alm.success(info);
     }
-    return Api.error('data error');
+    return Alm.error('data error');
   }
 
   Future<dynamic> info() async {
+
     //todo get info
-    return Api.error('info');
+
+    return Alm.error('info');
   }
 }
