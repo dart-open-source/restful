@@ -20,8 +20,8 @@ dependencies:
   uuid: ^2.2.2
   process_run: ^0.10.12+3
   alm:
-#    git: https://gitee.com/darto/alm.git
-    path: ../alm
+    git: https://gitee.com/darto/alm.git
+#    path: ../alm
 
 dev_dependencies:
   pedantic: ^1.9.0
