@@ -32,11 +32,6 @@ dynamic routerMap(HttpRequest request) {
 }
 
 void main(List<String> arguments) async {
-
-  /// actions start stop restart available
-  var pro = App.pro(arguments);
-  if (!await pro.needRun()) return;
-
   App.init();
   await Api.start(routerMap, port: 4040);
 }
@@ -45,17 +40,32 @@ void main(List<String> arguments) async {
 
 Listening on http://127.0.0.1:4040/
 
-## Usage
+## Usage for Background Mode [Here](https://pub.dev/packages/pro).
+
+- import pro lib to main.dart
+
+```dart
+import 'package:pro/pro.dart';
+
+void main(List<String> arguments) async {
+  
+  if (!await Pro(arguments).checkAction()) return;
+  
+  App.init();
+  await Api.start(routerMap, port: 4040);
+}
+
+```
+
+- for command line
 
 ```shell
 
-$ dart lib/app.dart start
-
-$ dart lib/app.dart stop
-
-$ dart lib/app.dart restart
-
-$ dart lib/app.dart status
+$ dart example/app.dart
+$ dart example/app.dart start
+$ dart example/app.dart stop
+$ dart example/app.dart restart
+$ dart example/app.dart status
 
 ```
 ....

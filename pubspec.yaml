@@ -1,6 +1,6 @@
 name: restful
 description: A starting point for Dart Restful Api package, for Using Api(HTTP) to Easyly access server info, see demo or examples.
-version: 0.0.2
+version: 0.0.3
 homepage: https://gitee.com/darto/restful
 
 ## pub publish --server=https://pub.dartlang.org
@@ -16,11 +16,11 @@ dependencies:
   mime: ^0.9.7
   convert: ^2.1.1
   mongo_dart: ^0.4.2
-  shelf_proxy: ^0.1.0+7
-  uuid: ^2.2.2
-  process_run: ^0.10.12+3
-  alm:
-    git: https://gitee.com/darto/alm.git
+  pro: ^0.0.2
+#    git: https://gitee.com/darto/pro.git
+#    path: ../pro
+  alm: ^0.0.3
+#    git: https://gitee.com/darto/alm.git
 #    path: ../alm
 
 dev_dependencies:

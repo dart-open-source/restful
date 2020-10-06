@@ -2,18 +2,15 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:mongo_dart/mongo_dart.dart';
 
-import 'global.dart';
 import 'restful_iml.dart';
-import 'tempCon.dart';
 import 'dao.dart';
-import 'processor.dart';
 
 final App = _App();
 
 class _App {
   Map _config = {};
 
-  static String path = '.restful/';
+  String path = '.restful/';
 
   File file(String s) {
     if (!Directory(path).existsSync()) Directory(path).createSync();
@@ -23,11 +20,6 @@ class _App {
   void init() async {
     print('init:${config}');
 
-    Alm.gitIgnoreUpdate(File('.gitignore'), path);
-
-    if (!App.file('cli').existsSync()) {
-      App.file('cli').writeAsStringSync(tempCli.replaceAll('#head#', '#${Alm.timestampStr()}'));
-    }
     if (config.containsKey('mongodb')) {
       Dao.init(config['mongodb']);
     }
@@ -42,8 +34,6 @@ class _App {
   }
 
   DbCollection db(String collection) => Dao.db.collection(collection);
-
-  Processor pro(List<String> arguments) => Processor(arguments, path);
 
   Future connect() async => await Dao.connect();
 

@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:mime/mime.dart';
-
-import 'global.dart';
+import 'package:alm/alm.dart';
 
 typedef kApiMethod = Future<dynamic> Function();
 typedef kPostMethod = bool Function(Map);

@@ -6,7 +6,7 @@ class SystemApi extends Api {
   Map<String, kApiMethod> get allows => {'info': info};
 
   Future<dynamic> info() async {
-    return Api.success({
+    return Alm.success({
       'version':'1.0.0',
     });
   }
