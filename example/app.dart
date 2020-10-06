@@ -6,7 +6,7 @@ export 'package:alm/alm.dart';
 /// import apis
 import 'api/SystemApi.dart';
 import 'api/UserApi.dart';
-import 'package:pro/pro.dart';
+// import 'package:pro/pro.dart';
 
 dynamic routerMap(HttpRequest request) {
   var action = request.uri.pathSegments.isNotEmpty ? request.uri.pathSegments.first : 'none';
@@ -19,10 +19,10 @@ dynamic routerMap(HttpRequest request) {
 
 void main(List<String> arguments) async {
   ///path setup
-  Pro.path = '.restful/';
+  // Pro.path = '.restful/';
 
   /// actions start stop restart available
-  if (!await Pro(arguments).checkAction()) return;
+  // if (!await Pro(arguments).checkAction()) return;
 
   ///
   await Api.start(routerMap, port: 4040);

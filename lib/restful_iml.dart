@@ -57,7 +57,7 @@ class Api implements _Api {
     dynamic map = {};
     map['ip'] = '${request.connectionInfo.remoteAddress.host}:${request.connectionInfo.remotePort}';
     map['header'] = '${request.headers}';
-    map['time'] = Alm.timedate();
+    map['time'] = Alm.timestamp();
     return map;
   }
 
@@ -70,7 +70,7 @@ class Api implements _Api {
 
     try {
       if (isPost && contentType.mimeType.toLowerCase()==ContentType.json.mimeType.toLowerCase()) {
-        postJson = jsonDecode(await utf8.decoder.bind(request).join());
+        postJson = Alm.map(await utf8.decoder.bind(request).join());
       }
 
       if (blocks.containsKey(action)) {
@@ -91,7 +91,7 @@ class Api implements _Api {
       res=Alm.error('Data?! json decode error');
     }
 
-    return jsonEncode(res);
+    return Alm.json(res);
   }
 
   Future<Map> postMultiPart([Map<String, kPostMethod> listFiles]) async {
@@ -193,7 +193,7 @@ class Api implements _Api {
         } catch (e) {
           err = e;
           response.statusCode = HttpStatus.internalServerError;
-          resBody = jsonEncode(Alm.error(e.toString()));
+          resBody = Alm.json(Alm.error(e.toString()));
         }
         if(resBody!=null) response.write(resBody);
         await response.close();
