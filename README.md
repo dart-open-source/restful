@@ -13,28 +13,13 @@ your app.dart file example:
 
 import 'package:restful/restful.dart';
 
-//Change routes and actions
-
-/// import apis
-import 'api/SystemApi.dart';
-import 'api/UserApi.dart';
-
-
-dynamic routerMap(HttpRequest request) {
-  var action = request.uri.pathSegments.isNotEmpty ? request.uri.pathSegments.first : 'none';
-  switch (action) {
-    case 'user':
-      return UserApi();
-    case 'system':
-      return SystemApi();
-  }
-  throw Exception('not defined Api.${action} !?@!@#@# ');
+void main() async {
+  ///
+  await Api.start((req) {
+    return Alm.success('hello world');
+  }, port: 4040);
 }
 
-void main(List<String> arguments) async {
-  App.init();
-  await Api.start(routerMap, port: 4040);
-}
 
 ```
 

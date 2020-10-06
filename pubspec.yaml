@@ -14,8 +14,5 @@ dependencies:
   http: ^0.12.1
   mime: ^0.9.7
   convert: ^2.1.1
-  pro:
-    path: ../pro
-  alm:
-    path: ../alm
-
+  pro: ^0.0.4
+  alm: ^0.0.5
