@@ -67,30 +67,23 @@ class Api implements _Api {
     var action = pathSegments.last;
     dynamic res;
 
-
-    try {
-      if (isPost && contentType.mimeType.toLowerCase()==ContentType.json.mimeType.toLowerCase()) {
-        postJson = Alm.map(await utf8.decoder.bind(request).join());
-      }
-
-      if (blocks.containsKey(action)) {
-        if (await headerCheckToken()){
-          res=Alm.error('token expired or need re login!');
-        }else{
-          await init();
-          res = await blocks[action]();
-        }
-      } else if (allows.containsKey(action)) {
-        await init();
-        res = await allows[action]();
-      } else {
-        res = Alm.error('$action not found in [$runtimeType]');
-      }
-
-    } catch (e) {
-      res=Alm.error('Data?! json decode error');
+    if (isPost && contentType.mimeType.toLowerCase()==ContentType.json.mimeType.toLowerCase()) {
+      postJson = Alm.map(await utf8.decoder.bind(request).join());
     }
 
+    if (blocks.containsKey(action)) {
+      if (await headerCheckToken()){
+        res=Alm.error('token expired or need re login!');
+      }else{
+        await init();
+        res = await blocks[action]();
+      }
+    } else if (allows.containsKey(action)) {
+      await init();
+      res = await allows[action]();
+    } else {
+      res = Alm.error('$action not found in [$runtimeType]');
+    }
     return Alm.json(res);
   }
 
