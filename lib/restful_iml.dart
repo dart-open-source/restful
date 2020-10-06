@@ -56,7 +56,10 @@ class Api implements _Api {
   Map get requestInfo {
     dynamic map = {};
     map['ip'] = '${request.connectionInfo.remoteAddress.host}:${request.connectionInfo.remotePort}';
-    map['header'] = '${request.headers}';
+    map['header'] =<String,dynamic>{};
+    request.headers.forEach((name, values) {
+      map['header'][name]=values.length>1?values.length:values.first;
+    });
     map['time'] = Alm.timestamp();
     return map;
   }
