@@ -22,9 +22,14 @@ abstract class _Api {
 }
 
 class Api implements _Api {
-  static Map error(dynamic s, {dynamic msg = 'error'}) => {'msg': msg, 'code': -1, 'result': s};
 
-  static Map success(dynamic s, {dynamic msg = 'success'}) => {'msg': msg, 'code': 1, 'result': s};
+  /// Use [Alm.error] instead
+  @deprecated
+  static Map error(dynamic s, {dynamic msg = 'error'}) => Alm.error(s,msg: msg);
+
+  /// Use [Alm.success] instead
+  @deprecated
+  static Map success(dynamic s, {dynamic msg = 'success'}) => Alm.success(s,msg: msg);
 
   static String generateToken(String pass, {Duration duration}) => Alm.tokenGen(pass, duration: duration);
   static bool expiredToken(String token, {Duration duration}) => Alm.tokenExpired(token);
@@ -59,29 +64,34 @@ class Api implements _Api {
 
   Future<String> enter(HttpRequest request) async {
     this.request = request;
+    var pathSegments = request.requestedUri.pathSegments;
+    var action = pathSegments.last;
+    dynamic res;
+
+
     try {
       if (isPost && contentType.mimeType.toLowerCase()==ContentType.json.mimeType.toLowerCase()) {
         postJson = jsonDecode(await utf8.decoder.bind(request).join());
       }
-    } catch (e) {
-      return jsonEncode(error('Data?! json decode error'));
-    }
-    var pathSegments = request.requestedUri.pathSegments;
-    var action = pathSegments.last;
-    dynamic res;
-    if (blocks.containsKey(action)) {
-      if (await headerCheckToken()){
-        res=error('token expired or need re login!');
-      }else{
+
+      if (blocks.containsKey(action)) {
+        if (await headerCheckToken()){
+          res=Alm.error('token expired or need re login!');
+        }else{
+          await init();
+          res = await blocks[action]();
+        }
+      } else if (allows.containsKey(action)) {
         await init();
-        res = await blocks[action]();
+        res = await allows[action]();
+      } else {
+        res = Alm.error('$action not found in [$runtimeType]');
       }
-    } else if (allows.containsKey(action)) {
-      await init();
-      res = await allows[action]();
-    } else {
-      res = error('$action not found in [$runtimeType]');
+
+    } catch (e) {
+      res=Alm.error('Data?! json decode error');
     }
+
     return jsonEncode(res);
   }
 
@@ -184,7 +194,7 @@ class Api implements _Api {
         } catch (e) {
           err = e;
           response.statusCode = HttpStatus.internalServerError;
-          resBody = jsonEncode(Api.error(e.toString()));
+          resBody = jsonEncode(Alm.error(e.toString()));
         }
         if(resBody!=null) response.write(resBody);
         await response.close();
